@@ -1,0 +1,140 @@
+[
+  {
+    "name": "FRESHNESS",
+    "severity": "HIGH",
+    "status": "FAIL",
+    "expected": "latest snapshot <= 100 days old",
+    "observed": "latest=2025-12-30, age_days=132",
+    "message": "Latest snapshot is 2025-12-30 (132 days old).",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "UNIQUENESS",
+    "severity": "CRITICAL",
+    "status": "PASS",
+    "expected": "0 duplicate (loan_id, snapshot_date) rows",
+    "observed": "0 duplicate rows",
+    "message": "Found 0 duplicate rows on primary key.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "REFERENTIAL_INTEGRITY",
+    "severity": "HIGH",
+    "status": "PASS",
+    "expected": "coverage >= 95%",
+    "observed": "coverage=99.909%",
+    "message": "99.91% of credit loan_ids match a customer record.",
+    "evidence_path": null,
+    "extra": {
+      "sample_unmatched": [
+        "rec1z9kWKWyY0ke3b",
+        "rec3L0PhkilBZCFWS",
+        "rec4pNtf3zVwryCPu",
+        "rec7gjn1eyL3DRe19",
+        "rec7lnWjJc8oMc4Vv",
+        "rec8ZbYsszU1rA7UY",
+        "recBCEDn5J9v5j659",
+        "recCICkaOYUZ5p8hm",
+        "recD9dzI4TGZPWUDT",
+        "recDXQdwYxRALpAzp",
+        "recE0hUVrhUbnokCc",
+        "recELdaenXuBs1C6j",
+        "recEdtZZKMD1sCsFM",
+        "recFhvF5L61EhJHFB",
+        "recFpCZYo6zyxAuw5",
+        "recH4tD51O6FrnGQo",
+        "recHDlQJbqoEqNwzo",
+        "recHMHf4dG6K5vLev",
+        "recIrnzldTy4IlNjA",
+        "recKjmNRASyp4bWzp",
+        "recLV3qqv41YRMnRu",
+        "recLaBx40AxsXIcUo",
+        "recLnWklP6mjEG1Ge",
+        "recNq41dCZjBBSkUR",
+        "recPPXFJlbVFvTJpS"
+      ]
+    }
+  },
+  {
+    "name": "RANGE_CUSTOMER_AGE",
+    "severity": "MEDIUM",
+    "status": "PASS",
+    "expected": "age in [18, 100]",
+    "observed": "0 out-of-range / 27770 non-null",
+    "message": "0 ages outside [18,100]. min=18.9, max=96.0",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "RANGE_DAYS_PAST_DUE",
+    "severity": "HIGH",
+    "status": "PASS",
+    "expected": "days_past_due in [0, 3650]",
+    "observed": "0 out-of-range / 71456",
+    "message": "0 DPD values outside [0,3650].",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "NULL_LOAN_ID",
+    "severity": "HIGH",
+    "status": "PASS",
+    "expected": "<= 0.0% null",
+    "observed": "0.000% null",
+    "message": "`LOAN_ID` is 0.00% null.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "NULL_DATE",
+    "severity": "HIGH",
+    "status": "PASS",
+    "expected": "<= 0.0% null",
+    "observed": "0.000% null",
+    "message": "`DATE` is 0.00% null.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "NULL_SALE_DATE",
+    "severity": "HIGH",
+    "status": "PASS",
+    "expected": "<= 0.0% null",
+    "observed": "0.000% null",
+    "message": "`SALE_DATE` is 0.00% null.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "NULL_ACCOUNT_STATUS_L1",
+    "severity": "MEDIUM",
+    "status": "PASS",
+    "expected": "<= 50.0% null",
+    "observed": "0.000% null",
+    "message": "`ACCOUNT_STATUS_L1` is 0.00% null.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "NULL_ACCOUNT_STATUS_L2",
+    "severity": "MEDIUM",
+    "status": "PASS",
+    "expected": "<= 50.0% null",
+    "observed": "0.000% null",
+    "message": "`ACCOUNT_STATUS_L2` is 0.00% null.",
+    "evidence_path": null,
+    "extra": {}
+  },
+  {
+    "name": "SCHEMA_DRIFT",
+    "severity": "CRITICAL",
+    "status": "PASS",
+    "expected": "columns present: ['loan_id', 'date', 'sale_date', 'account_status_l1', 'account_status_l2', 'days_past_due', 'arrears', 'balance', 'closing_balance']",
+    "observed": "all present",
+    "message": "Canonical schema honoured by all snapshots.",
+    "evidence_path": null,
+    "extra": {}
+  }
+]

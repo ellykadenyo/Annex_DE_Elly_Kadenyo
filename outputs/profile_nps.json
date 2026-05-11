@@ -1,0 +1,243 @@
+{
+  "dataset": "nps",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\NPS Data\\NPS Data.xlsx",
+  "row_count": 4129,
+  "column_count": 17,
+  "profiled_at": "2026-05-11T08:15:10.841335Z",
+  "columns": [
+    {
+      "name": "Submission ID",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 4129,
+      "distinct_pct": 100.0,
+      "top_values": {
+        "q4QvEg8": 1,
+        "GxVWbRo": 1,
+        "q4q9xD5": 1,
+        "RGQNrpj": 1,
+        "KY4EYPX": 1
+      }
+    },
+    {
+      "name": "Respondent ID",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 3756,
+      "distinct_pct": 90.966,
+      "top_values": {
+        "dByPay": 4,
+        "0NoGJ6": 4,
+        "loqJ86": 4,
+        "NZdMJp": 3,
+        "yVa9M0": 3
+      }
+    },
+    {
+      "name": "Submitted at",
+      "dtype": "datetime64[ns]",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 3087,
+      "distinct_pct": 74.764,
+      "top_values": {
+        "2025-07-07 13:38:00": 9,
+        "2025-10-07 15:20:00": 8,
+        "2025-07-07 13:40:00": 8,
+        "2025-07-07 13:48:00": 7,
+        "2025-07-22 14:10:00": 7
+      }
+    },
+    {
+      "name": "Loan Id",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 3532,
+      "distinct_pct": 85.541,
+      "top_values": {
+        "recUuLe9KNHZD6Mql": 5,
+        "reczmdCEsi8fe1xHf": 4,
+        "recObMVtL2N13CosM": 4,
+        "recpSgLxWQIXC6qfw": 4,
+        "rec7CFQLCsR52eQAs": 4
+      }
+    },
+    {
+      "name": "Using a scale from 0 (not likely) to 10 (very likely), how likely are you to recommend ABC Phones to friends or family?",
+      "dtype": "float64",
+      "null_count": 144,
+      "null_pct": 3.488,
+      "distinct": 11,
+      "distinct_pct": 0.266,
+      "min": 0.0,
+      "max": 10.0,
+      "mean": 6.779,
+      "median": 8.0,
+      "std": 3.387
+    },
+    {
+      "name": "What is the main reason for your score?",
+      "dtype": "object",
+      "null_count": 2946,
+      "null_pct": 71.349,
+      "distinct": 1060,
+      "distinct_pct": 25.672,
+      "top_values": {
+        "Good service": 23,
+        "10": 14,
+        "Good": 13,
+        "Reliable": 8,
+        "Good customer service": 7
+      }
+    },
+    {
+      "name": "What is one thing we could do to improve your experience with us?",
+      "dtype": "object",
+      "null_count": 2995,
+      "null_pct": 72.536,
+      "distinct": 1068,
+      "distinct_pct": 25.866,
+      "top_values": {
+        "Nothing": 13,
+        "Customer service": 9,
+        "Communication": 5,
+        "Battery": 4,
+        "Good": 4
+      }
+    },
+    {
+      "name": "Are you happy with the quality and performance of your device?",
+      "dtype": "object",
+      "null_count": 1502,
+      "null_pct": 36.377,
+      "distinct": 2,
+      "distinct_pct": 0.048,
+      "top_values": {
+        "Yes": 1999,
+        "No": 628
+      }
+    },
+    {
+      "name": "Are you happy with the service and support provided by ABC Phones?",
+      "dtype": "object",
+      "null_count": 1521,
+      "null_pct": 36.837,
+      "distinct": 2,
+      "distinct_pct": 0.048,
+      "top_values": {
+        "Yes": 2037,
+        "No": 571
+      }
+    },
+    {
+      "name": "Have you ever experienced a delay in your payment reflecting in your ABC account?",
+      "dtype": "object",
+      "null_count": 1760,
+      "null_pct": 42.625,
+      "distinct": 2,
+      "distinct_pct": 0.048,
+      "top_values": {
+        "No": 1647,
+        "Yes": 722
+      }
+    },
+    {
+      "name": "Have you ever had difficulty getting assistance from ABC Phones customer support when needed?",
+      "dtype": "object",
+      "null_count": 1777,
+      "null_pct": 43.037,
+      "distinct": 3,
+      "distinct_pct": 0.073,
+      "top_values": {
+        "No": 1460,
+        "Yes": 621,
+        "No, I have never looked for customer care": 271
+      }
+    },
+    {
+      "name": "(If Yes) \u2013 Please describe the challenge you faced and how we can improve your experience.",
+      "dtype": "object",
+      "null_count": 2169,
+      "null_pct": 52.531,
+      "distinct": 1339,
+      "distinct_pct": 32.429,
+      "top_values": {
+        "No": 313,
+        "No challenge": 77,
+        ".": 26,
+        "Na": 20,
+        "Non": 16
+      }
+    },
+    {
+      "name": "Have you experienced any battery-related issues with your MoPhones device?",
+      "dtype": "object",
+      "null_count": 2048,
+      "null_pct": 49.6,
+      "distinct": 2,
+      "distinct_pct": 0.048,
+      "top_values": {
+        "No": 1293,
+        "Yes": 788
+      }
+    },
+    {
+      "name": "Have you used the MoPhones app (MoApp) to manage your account or make payments?",
+      "dtype": "object",
+      "null_count": 2069,
+      "null_pct": 50.109,
+      "distinct": 3,
+      "distinct_pct": 0.073,
+      "top_values": {
+        "Yes, and I am satisfied with the MoApp": 1419,
+        "No, I have never used it": 407,
+        "Yes, but I am not satisfied with the MoApp": 234
+      }
+    },
+    {
+      "name": "Which communication channel do you prefer when contacting MoPhones for inquiries or support?",
+      "dtype": "object",
+      "null_count": 2092,
+      "null_pct": 50.666,
+      "distinct": 5,
+      "distinct_pct": 0.121,
+      "top_values": {
+        "Phone Call \u2013 +254 728 444 442 or +254 709 924 404": 1046,
+        "MoPhones App": 468,
+        "Free SMS \u2013 25044": 232,
+        "Reach Out via a Sales Agent": 232,
+        "Self-Service USSD \u2013 *789*25044#": 59
+      }
+    },
+    {
+      "name": "Have you ever had your phone lock despite making a payment on time?",
+      "dtype": "object",
+      "null_count": 2099,
+      "null_pct": 50.836,
+      "distinct": 2,
+      "distinct_pct": 0.048,
+      "top_values": {
+        "No": 1467,
+        "Yes": 563
+      }
+    },
+    {
+      "name": "Any other Feedback?",
+      "dtype": "object",
+      "null_count": 2376,
+      "null_pct": 57.544,
+      "distinct": 1163,
+      "distinct_pct": 28.167,
+      "top_values": {
+        "No": 354,
+        ".": 18,
+        "no": 16,
+        "Good": 13,
+        "Nothing": 13
+      }
+    }
+  ]
+}

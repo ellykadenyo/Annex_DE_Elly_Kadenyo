@@ -1,0 +1,234 @@
+{
+  "dataset": "sales_sales_details",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\Sales and Customer Data\\Sales and Customer Data.xlsx",
+  "row_count": 1048575,
+  "column_count": 16,
+  "profiled_at": "2026-05-11T08:15:07.243635Z",
+  "columns": [
+    {
+      "name": "SALE_ID",
+      "dtype": "object",
+      "null_count": 1027828,
+      "null_pct": 98.021,
+      "distinct": 20747,
+      "distinct_pct": 1.979,
+      "top_values": {
+        "recbA2XGjEYbl4xay": 1,
+        "recg9SxxjvTdgP6NC": 1,
+        "rec0P2Z778n8igV9u": 1,
+        "recbZfItLLouuJj9h": 1,
+        "recBtxgmMbuLKdANY": 1
+      }
+    },
+    {
+      "name": "SALE_DATE",
+      "dtype": "datetime64[ns]",
+      "null_count": 1027828,
+      "null_pct": 98.021,
+      "distinct": 939,
+      "distinct_pct": 0.09,
+      "top_values": {
+        "2025-12-02": 80,
+        "2025-12-23": 77,
+        "2025-12-05": 75,
+        "2025-12-24": 74,
+        "2025-12-04": 73
+      }
+    },
+    {
+      "name": "RETURNED",
+      "dtype": "float64",
+      "null_count": 1027828,
+      "null_pct": 98.021,
+      "distinct": 2,
+      "distinct_pct": 0.0,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.084,
+      "median": 0.0,
+      "std": 0.277
+    },
+    {
+      "name": "RETURN_DATE",
+      "dtype": "datetime64[ns]",
+      "null_count": 1046831,
+      "null_pct": 99.834,
+      "distinct": 530,
+      "distinct_pct": 0.051,
+      "top_values": {
+        "2025-05-27": 30,
+        "2025-04-16": 23,
+        "2025-12-24": 19,
+        "2025-01-15": 17,
+        "2025-04-11": 17
+      }
+    },
+    {
+      "name": "SALE_TYPE",
+      "dtype": "object",
+      "null_count": 1027830,
+      "null_pct": 98.022,
+      "distinct": 3,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "Financed": 19570,
+        "Non Financed": 992,
+        "Y Lost": 183
+      }
+    },
+    {
+      "name": "SELLER",
+      "dtype": "object",
+      "null_count": 1027905,
+      "null_pct": 98.029,
+      "distinct": 519,
+      "distinct_pct": 0.049,
+      "top_values": {
+        "Christine Muloko": 1295,
+        "MerryAnn Achieng": 1121,
+        "Cynthia Mutai": 764,
+        "Esther Nduta": 719,
+        "Naomi Anyango Odhiambo": 666
+      }
+    },
+    {
+      "name": "SELLER_TYPE",
+      "dtype": "object",
+      "null_count": 1032799,
+      "null_pct": 98.495,
+      "distinct": 5,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "Sales Executive": 10517,
+        "Telesales Executive": 3642,
+        "SFM (Sales Force Manager)": 1554,
+        "Commission Merchant": 62,
+        "Rider": 1
+      }
+    },
+    {
+      "name": "RETURN_POLICY_COMPLIANCE",
+      "dtype": "object",
+      "null_count": 1046831,
+      "null_pct": 99.834,
+      "distinct": 2,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "out of policy": 1260,
+        "in policy": 484
+      }
+    },
+    {
+      "name": "CASH_PRICE",
+      "dtype": "float64",
+      "null_count": 1027830,
+      "null_pct": 98.022,
+      "distinct": 259,
+      "distinct_pct": 0.025,
+      "min": 7999.0,
+      "max": 215499.0,
+      "mean": 42392.584,
+      "median": 37999.0,
+      "std": 19082.531
+    },
+    {
+      "name": "LOAN_PRICE",
+      "dtype": "float64",
+      "null_count": 1027830,
+      "null_pct": 98.022,
+      "distinct": 930,
+      "distinct_pct": 0.089,
+      "min": 15159.0,
+      "max": 334219.0,
+      "mean": 73090.441,
+      "median": 67199.0,
+      "std": 31220.699
+    },
+    {
+      "name": "CLIENT_MODEL",
+      "dtype": "object",
+      "null_count": 1027853,
+      "null_pct": 98.024,
+      "distinct": 3,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "1C": 16099,
+        "3C": 4462,
+        "2C": 161
+      }
+    },
+    {
+      "name": "BUSINESS_MODEL",
+      "dtype": "object",
+      "null_count": 1027828,
+      "null_pct": 98.021,
+      "distinct": 7,
+      "distinct_pct": 0.001,
+      "top_values": {
+        "1P1C": 12721,
+        "1P3C": 3479,
+        "Not Available": 2111,
+        "3P1C": 1662,
+        "3P3C": 615
+      }
+    },
+    {
+      "name": "LOAN_TERM",
+      "dtype": "object",
+      "null_count": 1027832,
+      "null_pct": 98.022,
+      "distinct": 3,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "12M": 19418,
+        "STDHIGH": 761,
+        "3M": 564
+      }
+    },
+    {
+      "name": "PRODUCT_NAME",
+      "dtype": "object",
+      "null_count": 1027830,
+      "null_pct": 98.022,
+      "distinct": 132,
+      "distinct_pct": 0.013,
+      "top_values": {
+        "Samsung-Note-10-Plus-256GB": 1953,
+        "Samsung-Note-20-128GB": 1643,
+        "Samsung-Note-20-Ultra-128GB": 1290,
+        "Samsung-Galaxy-S10-128GB": 1179,
+        "Samsung-Galaxy-S20-Plus-5G-128GB": 1138
+      }
+    },
+    {
+      "name": "MODEL",
+      "dtype": "object",
+      "null_count": 1027830,
+      "null_pct": 98.022,
+      "distinct": 82,
+      "distinct_pct": 0.008,
+      "top_values": {
+        "Note-10-Plus": 1985,
+        "Note-20-Ultra": 1696,
+        "Note-20": 1663,
+        "Galaxy-S10": 1206,
+        "Galaxy-S20-Plus-5G": 1153
+      }
+    },
+    {
+      "name": "Loan Id",
+      "dtype": "object",
+      "null_count": 1027879,
+      "null_pct": 98.026,
+      "distinct": 20691,
+      "distinct_pct": 1.973,
+      "top_values": {
+        "recv1o61rctP3nHaR": 2,
+        "rec1s8Oc6qhMCGKZ2": 2,
+        "recJA81Oa7JlNaMXI": 2,
+        "reckeATieWqnKWWsr": 2,
+        "recjYyRXvCYuPvpRK": 2
+      }
+    }
+  ]
+}

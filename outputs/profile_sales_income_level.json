@@ -1,0 +1,89 @@
+{
+  "dataset": "sales_income_level",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\Sales and Customer Data\\Sales and Customer Data.xlsx",
+  "row_count": 1048575,
+  "column_count": 6,
+  "profiled_at": "2026-05-11T08:15:09.187875Z",
+  "columns": [
+    {
+      "name": "Loan Id",
+      "dtype": "object",
+      "null_count": 1036690,
+      "null_pct": 98.867,
+      "distinct": 10609,
+      "distinct_pct": 1.012,
+      "top_values": {
+        "rec7jCmNMPNWJHeDs": 11,
+        "recedDVHYRvb9hmo8": 10,
+        "recEx6e0qdGKb242p": 8,
+        "recKSeIKPEbJSkeU4": 7,
+        "recIjXPsSowgUkte6": 6
+      }
+    },
+    {
+      "name": "Duration",
+      "dtype": "float64",
+      "null_count": 1025736,
+      "null_pct": 97.822,
+      "distinct": 23,
+      "distinct_pct": 0.002,
+      "min": 1.0,
+      "max": 24.0,
+      "mean": 8.572,
+      "median": 6.0,
+      "std": 3.09
+    },
+    {
+      "name": "Received",
+      "dtype": "float64",
+      "null_count": 1025736,
+      "null_pct": 97.822,
+      "distinct": 21191,
+      "distinct_pct": 2.021,
+      "min": 0.0,
+      "max": 38271145.81,
+      "mean": 700564.823,
+      "median": 324032.63,
+      "std": 1315134.312
+    },
+    {
+      "name": "Persons Received From Total",
+      "dtype": "float64",
+      "null_count": 1025736,
+      "null_pct": 97.822,
+      "distinct": 20993,
+      "distinct_pct": 2.002,
+      "min": 0.0,
+      "max": 37895675.0,
+      "mean": 625723.153,
+      "median": 286470.0,
+      "std": 1206708.031
+    },
+    {
+      "name": "Banks Received",
+      "dtype": "float64",
+      "null_count": 1025736,
+      "null_pct": 97.822,
+      "distinct": 16632,
+      "distinct_pct": 1.586,
+      "min": 0.0,
+      "max": 26076151.0,
+      "mean": 349548.462,
+      "median": 86480.0,
+      "std": 950855.78
+    },
+    {
+      "name": "Paybills Received Others",
+      "dtype": "float64",
+      "null_count": 1025736,
+      "null_pct": 97.822,
+      "distinct": 12560,
+      "distinct_pct": 1.198,
+      "min": -1975599.0,
+      "max": 22007251.25,
+      "mean": 92289.034,
+      "median": 6851.7,
+      "std": 458373.717
+    }
+  ]
+}

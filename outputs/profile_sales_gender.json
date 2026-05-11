@@ -1,0 +1,52 @@
+{
+  "dataset": "sales_gender",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\Sales and Customer Data\\Sales and Customer Data.xlsx",
+  "row_count": 1048575,
+  "column_count": 3,
+  "profiled_at": "2026-05-11T08:15:07.753162Z",
+  "columns": [
+    {
+      "name": "Loan Id",
+      "dtype": "object",
+      "null_count": 1033679,
+      "null_pct": 98.579,
+      "distinct": 10497,
+      "distinct_pct": 1.001,
+      "top_values": {
+        "recDXYKagrTFQRY6N": 35,
+        "recshDmC4CZAC7nzP": 27,
+        "recjQrXC2PeEUERlC": 27,
+        "recNBR1CPkQSVzm9M": 24,
+        "rec4GGXWNSxmyeY65": 24
+      }
+    },
+    {
+      "name": "Citizenship",
+      "dtype": "object",
+      "null_count": 998787,
+      "null_pct": 95.252,
+      "distinct": 3,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "KENYAN": 46075,
+        "CITIZEN": 3545,
+        "Kenyan": 168
+      }
+    },
+    {
+      "name": "Gender",
+      "dtype": "object",
+      "null_count": 998792,
+      "null_pct": 95.252,
+      "distinct": 5,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "Male": 31329,
+        "Female": 18276,
+        "M": 156,
+        "F": 12,
+        "Unspecified": 10
+      }
+    }
+  ]
+}

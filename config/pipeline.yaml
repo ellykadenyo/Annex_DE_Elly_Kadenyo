@@ -1,0 +1,104 @@
+# ABC Phones Credit Portfolio - Pipeline Configuration
+# All paths are resolved relative to the Annex_DE_Elly_Kadenyo/ root.
+
+project:
+  name: "ABC Phones Credit Portfolio"
+  owner: "Elly Kadenyo"
+  timezone: "Africa/Nairobi"
+
+paths:
+  raw:
+    credit_dir: "../Credit Data"
+    credit_glob: "Credit Data - *.csv"
+    sales_xlsx: "../Sales and Customer Data/Sales and Customer Data.xlsx"
+    nps_xlsx: "../NPS Data/NPS Data.xlsx"
+    definitions_xlsx: "../Credit Data/Credit Data Definitions.xlsx"
+  staging: "data/staging"
+  curated: "data/curated"
+  warehouse: "data/warehouse/abc_phones.duckdb"
+  outputs: "outputs"
+  logs: "logs"
+
+ingest:
+  # Snapshot date is parsed from filename: "Credit Data - DD-MM-YYYY.csv".
+  filename_date_pattern: 'Credit Data - (\d{2}-\d{2}-\d{4})\.csv'
+  filename_date_format: "%d-%m-%Y"
+  # Pandas read_csv kwargs for credit files (kept conservative).
+  csv_read:
+    encoding: "utf-8"
+    low_memory: false
+
+feature_engineering:
+  age_bands:
+    # Inclusive lower, exclusive upper boundaries. None = open.
+    - { label: "18-25", min: 18, max: 26 }
+    - { label: "26-35", min: 26, max: 36 }
+    - { label: "36-45", min: 36, max: 46 }
+    - { label: "46-55", min: 46, max: 56 }
+    - { label: "55+",   min: 56, max: null }
+  income_bands:
+    - { label: "Below 5,000",       min: 0,       max: 5000 }
+    - { label: "5,000-9,999",       min: 5000,    max: 10000 }
+    - { label: "10,000-19,999",     min: 10000,   max: 20000 }
+    - { label: "20,000-29,999",     min: 20000,   max: 30000 }
+    - { label: "30,000-49,999",     min: 30000,   max: 50000 }
+    - { label: "50,000-99,999",     min: 50000,   max: 100000 }
+    - { label: "100,000-149,999",   min: 100000,  max: 150000 }
+    - { label: "150,000+",          min: 150000,  max: null }
+  risk_category:
+    # Tiered logic - first match wins (top-down).
+    rules:
+      - { name: "Critical", account_status_l1_in: ["Write Off", "Blocked", "Default", "Lost"] }
+      - { name: "Critical", account_status_l2_in: ["PAR 60", "PAR 90", "PAR 90+"] }
+      - { name: "Critical", days_past_due_min: 60 }
+      - { name: "High",     account_status_l2_in: ["PAR 30"] }
+      - { name: "High",     days_past_due_min: 30 }
+      - { name: "Medium",   account_status_l2_in: ["PAR 7"] }
+      - { name: "Medium",   days_past_due_min: 7 }
+      - { name: "Low",      default: true }
+
+quality:
+  freshness:
+    expected_snapshots_per_year: 4
+    max_days_between_snapshots: 100
+  nulls:
+    # Maximum acceptable null percentage by column (after cleaning).
+    customer_id_columns:
+      LOAN_ID: 0.0
+      DATE: 0.0
+      SALE_DATE: 0.0
+      ACCOUNT_STATUS_L1: 0.5
+      ACCOUNT_STATUS_L2: 0.5
+  ranges:
+    age_min: 18
+    age_max: 100
+    days_past_due_min: 0
+    days_past_due_max: 3650
+    income_min: 0
+    income_max: 10000000   # KES per month (very generous upper bound)
+  referential_integrity:
+    # All LOAN_ID in credit must exist in sales.
+    credit_to_sales_min_coverage: 0.95
+  schema_drift:
+    # Expected columns in credit snapshots (canonical).
+    credit_expected_columns:
+      - LOAN_ID
+      - DATE
+      - SALE_DATE
+      - ACCOUNT_STATUS_L1
+      - ACCOUNT_STATUS_L2
+      - DAYS_PAST_DUE
+      - ARREARS
+      - BALANCE
+      - CLOSING_BALANCE
+
+alerting:
+  channels:
+    - { name: "email",    recipients: ["data-eng@abcphones.example", "analytics-lead@abcphones.example"] }
+    - { name: "slack",    webhook_env: "ALERT_SLACK_WEBHOOK" }
+    - { name: "pagerduty", routing_key_env: "ALERT_PAGERDUTY_KEY" }
+  severity_routing:
+    CRITICAL: ["email", "slack", "pagerduty"]
+    HIGH:     ["email", "slack"]
+    MEDIUM:   ["email"]
+    LOW:      []

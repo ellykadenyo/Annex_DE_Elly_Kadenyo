@@ -1,0 +1,82 @@
+{
+  "dataset": "sales_dob",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\Sales and Customer Data\\Sales and Customer Data.xlsx",
+  "row_count": 1048575,
+  "column_count": 5,
+  "profiled_at": "2026-05-11T08:15:08.813379Z",
+  "columns": [
+    {
+      "name": "_id",
+      "dtype": "object",
+      "null_count": 991445,
+      "null_pct": 94.552,
+      "distinct": 57130,
+      "distinct_pct": 5.448,
+      "top_values": {
+        "6954ef5a6477902e05d5711c": 1,
+        "67c57f7b5a877e67ca1e9636": 1,
+        "67c57f7c5a877e67ca1e964f": 1,
+        "67c585175a877e67ca1e99eb": 1,
+        "67c585185a877e67ca1e9a00": 1
+      }
+    },
+    {
+      "name": "provider",
+      "dtype": "object",
+      "null_count": 991445,
+      "null_pct": 94.552,
+      "distinct": 3,
+      "distinct_pct": 0.0,
+      "top_values": {
+        "SPINMOBILE": 39244,
+        "TRANSUNION": 17302,
+        "SMILEID": 584
+      }
+    },
+    {
+      "name": "date_of_birth",
+      "dtype": "object",
+      "null_count": 991654,
+      "null_pct": 94.572,
+      "distinct": 17087,
+      "distinct_pct": 1.63,
+      "top_values": {
+        "1970-01-01T00:00:00+03:00": 193,
+        "1980-01-01T00:00:00+03:00": 175,
+        "1977-01-01T00:00:00+03:00": 138,
+        "1974-01-01 00:00:00": 116,
+        "1986-01-01 00:00:00": 115
+      }
+    },
+    {
+      "name": "Loan Id ",
+      "dtype": "object",
+      "null_count": 1035013,
+      "null_pct": 98.707,
+      "distinct": 11217,
+      "distinct_pct": 1.07,
+      "top_values": {
+        "recDXYKagrTFQRY6N": 36,
+        "recshDmC4CZAC7nzP": 27,
+        "recjQrXC2PeEUERlC": 27,
+        "recYjCkO5sUgRSDgG": 26,
+        "recAeClSqWETQ20yC": 25
+      }
+    },
+    {
+      "name": "createdAt UTC",
+      "dtype": "object",
+      "null_count": 991445,
+      "null_pct": 94.552,
+      "distinct": 57130,
+      "distinct_pct": 5.448,
+      "top_values": {
+        "2025-12-31T09:39:38.340Z": 1,
+        "2025-03-03T12:12:02.196Z": 1,
+        "2025-03-03T12:12:02.967Z": 1,
+        "2025-03-03T10:32:05.687Z": 1,
+        "2025-03-03T10:32:06.385Z": 1
+      }
+    }
+  ]
+}

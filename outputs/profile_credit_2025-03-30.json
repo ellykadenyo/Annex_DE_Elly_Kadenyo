@@ -1,0 +1,453 @@
+{
+  "dataset": "credit_2025-03-30",
+  "source": "C:\\Users\\ekadenyo\\Desktop\\codes\\Data-Engineer-Case-Study\\Credit Data\\Credit Data - 2025-03-30.csv",
+  "row_count": 11024,
+  "column_count": 33,
+  "profiled_at": "2026-05-11T08:11:27.439048Z",
+  "columns": [
+    {
+      "name": "LOAN_ID",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 11024,
+      "distinct_pct": 100.0,
+      "top_values": {
+        "recgX9rrIqRr9BTrJ": 1,
+        "recAGWrEx1Y2gbot0": 1,
+        "recxvyalMRb0cgnQz": 1,
+        "recWOPoO5uHLcryHq": 1,
+        "recz5rwY5qXPnaiPn": 1
+      }
+    },
+    {
+      "name": "DATE",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 1,
+      "distinct_pct": 0.009,
+      "top_values": {
+        "3/31/2025": 11024
+      }
+    },
+    {
+      "name": "CUSTOMER_AGE",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 670,
+      "distinct_pct": 6.078,
+      "min": 0.0,
+      "max": 782.0,
+      "mean": 254.814,
+      "median": 237.0,
+      "std": 171.256
+    },
+    {
+      "name": "TOTAL_PAID",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 4988,
+      "distinct_pct": 45.247,
+      "min": -20499.0,
+      "max": 222159.0,
+      "mean": 34942.286,
+      "median": 28999.5,
+      "std": 25229.346
+    },
+    {
+      "name": "TOTAL_DUE_TODAY",
+      "dtype": "float64",
+      "null_count": 5,
+      "null_pct": 0.045,
+      "distinct": 1778,
+      "distinct_pct": 16.128,
+      "min": 3799.0,
+      "max": 334219.0,
+      "mean": 47996.126,
+      "median": 44479.0,
+      "std": 26925.481
+    },
+    {
+      "name": "BALANCE",
+      "dtype": "float64",
+      "null_count": 1,
+      "null_pct": 0.009,
+      "distinct": 4641,
+      "distinct_pct": 42.099,
+      "min": -37844.0,
+      "max": 205019.0,
+      "mean": 36286.6,
+      "median": 34170.0,
+      "std": 28870.641
+    },
+    {
+      "name": "DAYS_PAST_DUE",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 604,
+      "distinct_pct": 5.479,
+      "min": 0.0,
+      "max": 774.0,
+      "mean": 90.457,
+      "median": 0.0,
+      "std": 145.266
+    },
+    {
+      "name": "CLOSING_BALANCE",
+      "dtype": "float64",
+      "null_count": 1,
+      "null_pct": 0.009,
+      "distinct": 3558,
+      "distinct_pct": 32.275,
+      "min": -1.0,
+      "max": 205019.0,
+      "mean": 28878.588,
+      "median": 25312.0,
+      "std": 31517.741
+    },
+    {
+      "name": "ADVANCE",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 720,
+      "distinct_pct": 6.531,
+      "min": 0.0,
+      "max": 67760.0,
+      "mean": 503.485,
+      "median": 0.0,
+      "std": 2989.202
+    },
+    {
+      "name": "BALANCE_DUE_TO_DATE",
+      "dtype": "float64",
+      "null_count": 5,
+      "null_pct": 0.045,
+      "distinct": 4189,
+      "distinct_pct": 37.999,
+      "min": -179579.0,
+      "max": 67760.0,
+      "mean": -13008.313,
+      "median": -1220.0,
+      "std": 21156.678
+    },
+    {
+      "name": "ARREARS",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 3470,
+      "distinct_pct": 31.477,
+      "min": 0.0,
+      "max": 179579.0,
+      "mean": 13505.898,
+      "median": 1220.0,
+      "std": 20614.124
+    },
+    {
+      "name": "BALANCE_DUE_STATUS",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 3,
+      "distinct_pct": 0.027,
+      "top_values": {
+        "Arrears": 6743,
+        "up to date": 2389,
+        "advance": 1892
+      }
+    },
+    {
+      "name": "PAYMENT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 219,
+      "distinct_pct": 1.987,
+      "min": 0.0,
+      "max": 47499.0,
+      "mean": 106.686,
+      "median": 0.0,
+      "std": 885.417
+    },
+    {
+      "name": "EXPECTED_PAYMENT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 172,
+      "distinct_pct": 1.56,
+      "min": 0.0,
+      "max": 47499.0,
+      "mean": 193.167,
+      "median": 0.0,
+      "std": 897.62
+    },
+    {
+      "name": "FIRST_PAYMENT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 2,
+      "distinct_pct": 0.018,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.003,
+      "median": 0.0,
+      "std": 0.051
+    },
+    {
+      "name": "FIRST_EXPECTED_PAYMENT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 2,
+      "distinct_pct": 0.018,
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.003,
+      "median": 0.0,
+      "std": 0.051
+    },
+    {
+      "name": "ACCOUNT_STATUS_L1",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 20,
+      "distinct_pct": 0.181,
+      "top_values": {
+        "Existing Active": 3583,
+        "Write Off": 1729,
+        "Paid Off Loan": 1403,
+        "First Payment Default": 712,
+        "New Active": 633
+      }
+    },
+    {
+      "name": "ACCOUNT_STATUS_L2",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 9,
+      "distinct_pct": 0.082,
+      "top_values": {
+        "Active": 4216,
+        "PAR 30": 2345,
+        "Paid Off": 1913,
+        "Return": 828,
+        "FPD": 712
+      }
+    },
+    {
+      "name": "RETURN_DATE",
+      "dtype": "object",
+      "null_count": 9839,
+      "null_pct": 89.251,
+      "distinct": 428,
+      "distinct_pct": 3.882,
+      "top_values": {
+        "5/27/2025": 28,
+        "4/16/2025": 23,
+        "1/15/2025": 17,
+        "4/4/2025": 15,
+        "4/11/2025": 14
+      }
+    },
+    {
+      "name": "SALE_DATE",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 670,
+      "distinct_pct": 6.078,
+      "top_values": {
+        "7/3/2024": 60,
+        "6/28/2024": 57,
+        "7/5/2024": 55,
+        "12/24/2024": 50,
+        "7/6/2024": 49
+      }
+    },
+    {
+      "name": "CREDIT_CHECK_DONE",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 4,
+      "distinct_pct": 0.036,
+      "top_values": {
+        "Y LOAN": 10392,
+        "Y CASH": 531,
+        "Y LOST": 100,
+        "Z DEMO": 1
+      }
+    },
+    {
+      "name": "PAYMENT_AMOUNT",
+      "dtype": "float64",
+      "null_count": 10377,
+      "null_pct": 94.131,
+      "distinct": 216,
+      "distinct_pct": 1.959,
+      "min": 0.0,
+      "max": 47499.0,
+      "mean": 1760.226,
+      "median": 1160.0,
+      "std": 3145.421
+    },
+    {
+      "name": "ADJUSTMENT_AMOUNT",
+      "dtype": "float64",
+      "null_count": 10377,
+      "null_pct": 94.131,
+      "distinct": 4,
+      "distinct_pct": 0.036,
+      "min": 0.0,
+      "max": 10130.0,
+      "mean": 57.558,
+      "median": 0.0,
+      "std": 738.226
+    },
+    {
+      "name": "PREPAYMENT_AMOUNT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 15,
+      "distinct_pct": 0.136,
+      "min": 0.0,
+      "max": 67049.0,
+      "mean": 37.984,
+      "median": 0.0,
+      "std": 1226.736
+    },
+    {
+      "name": "DEPOSIT",
+      "dtype": "float64",
+      "null_count": 1,
+      "null_pct": 0.009,
+      "distinct": 281,
+      "distinct_pct": 2.549,
+      "min": -1.0,
+      "max": 55499.0,
+      "mean": 9323.514,
+      "median": 7999.0,
+      "std": 5720.07
+    },
+    {
+      "name": "WEEKLY_RATE",
+      "dtype": "float64",
+      "null_count": 1,
+      "null_pct": 0.009,
+      "distinct": 245,
+      "distinct_pct": 2.222,
+      "min": 370.0,
+      "max": 8720.0,
+      "mean": 1240.46,
+      "median": 1170.0,
+      "std": 527.561
+    },
+    {
+      "name": "CREDIT_EXPIRY",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 743,
+      "distinct_pct": 6.74,
+      "top_values": {
+        "4/4/2025": 423,
+        "4/2/2025": 395,
+        "4/5/2025": 391,
+        "4/3/2025": 358,
+        "4/7/2025": 336
+      }
+    },
+    {
+      "name": "NEXT_INVOICE_DATE",
+      "dtype": "object",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 7,
+      "distinct_pct": 0.063,
+      "top_values": {
+        "4/4/2025": 1917,
+        "4/5/2025": 1787,
+        "4/2/2025": 1784,
+        "4/7/2025": 1741,
+        "4/1/2025": 1669
+      }
+    },
+    {
+      "name": "DISCOUNT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 165,
+      "distinct_pct": 1.497,
+      "min": 0.0,
+      "max": 51080.0,
+      "mean": 231.342,
+      "median": 0.0,
+      "std": 2309.75
+    },
+    {
+      "name": "OVERPAYMENT_AMOUNT",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 119,
+      "distinct_pct": 1.079,
+      "min": 0.0,
+      "max": 40600.0,
+      "mean": 24.917,
+      "median": 0.0,
+      "std": 541.291
+    },
+    {
+      "name": "MAX_PAYMENT_DATE",
+      "dtype": "object",
+      "null_count": 66,
+      "null_pct": 0.599,
+      "distinct": 909,
+      "distinct_pct": 8.246,
+      "top_values": {
+        "12/25/2025": 162,
+        "12/27/2025": 155,
+        "12/24/2025": 151,
+        "12/29/2025": 147,
+        "12/26/2025": 138
+      }
+    },
+    {
+      "name": "INITIAL_PAY",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 742,
+      "distinct_pct": 6.731,
+      "min": -2261.0,
+      "max": 131999.0,
+      "mean": 12365.098,
+      "median": 9229.0,
+      "std": 10242.312
+    },
+    {
+      "name": "TOTAL_PAID_WITH_ADJUSTMENTS_15D",
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "distinct": 4935,
+      "distinct_pct": 44.766,
+      "min": -20499.0,
+      "max": 222159.0,
+      "mean": 34996.824,
+      "median": 29239.0,
+      "std": 25412.297
+    }
+  ]
+}
