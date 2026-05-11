@@ -29,16 +29,6 @@ and a generated slide deck - all driven by a single command.
 
 ## TL;DR - Run It
 
-The pipeline expects the three raw datasets to live at the project root:
-
-```
-Data-Engineer-Case-Study/
-  Credit Data/
-  Sales and Customer Data/
-  NPS Data/
-  Annex_DE_Elly_Kadenyo/      <- THIS FOLDER
-```
-
 ### One-shot (PowerShell on Windows)
 
 ```powershell
