@@ -441,7 +441,7 @@ Remove-Item -Recurse data/staging, data/curated, data/warehouse, outputs, logs
 
 ```
 Annex_DE_Elly_Kadenyo/
-├── SOLUTION_README.md           <- you are here
+├── README.md           <- you are here
 ├── Makefile                     <- POSIX convenience targets
 ├── run.ps1                      <- PowerShell convenience runner
 ├── requirements.txt             <- pinned dependencies
