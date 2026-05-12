@@ -2,8 +2,7 @@
 
 A reproducible, end-to-end data pipeline for ABC Phones' credit portfolio,
 sales / customer and NPS data. Goes from raw spreadsheets to a queryable
-DuckDB warehouse, a 7-check data-quality framework, portfolio analytics
-and a generated slide deck - all driven by a single command.
+DuckDB warehouse, a 7-check data-quality framework, and portfolio analytics.
 
 > **Author**: Elly Kadenyo
 > **Stack**: Python 3.13 - pandas - DuckDB - matplotlib - ReportLab (all OSS)
