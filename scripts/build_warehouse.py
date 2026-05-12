@@ -44,32 +44,40 @@ from utils import (
 )
 
 
+# Directory holding the .sql files for views.
 SQL_DIR = ANNEX_ROOT / "sql"
 
 
+# Read a SQL file and execute its contents on the given connection.
 def _exec_file(con: duckdb.DuckDBPyConnection, path: Path) -> None:
     sql = path.read_text(encoding="utf-8")
     con.execute(sql)
 
 
+# CLI entrypoint: load curated Parquet into DuckDB and create views.
 def main(argv: list[str] | None = None) -> int:
+    # Parse CLI args.
     parser = argparse.ArgumentParser(description="Build the DuckDB warehouse")
     parser.add_argument("--config", default=None)
     parser.add_argument("--fresh", action="store_true",
                         help="Drop and recreate the warehouse file")
     args = parser.parse_args(argv)
 
+    # Load config + set up directories and logger.
     cfg = load_config(args.config)
     paths = resolve_paths(cfg)
     ensure_dirs(paths)
     logger = get_logger("warehouse", paths.logs)
 
+    # Drop the warehouse file when --fresh is passed.
     if args.fresh and paths.warehouse.exists():
         paths.warehouse.unlink()
         log_event(logger, "warehouse_dropped", path=str(paths.warehouse))
 
+    # Open the DuckDB file.
     con = duckdb.connect(str(paths.warehouse))
 
+    # Create tables by reading the Parquet sources directly.
     with timed(logger, "load_tables"):
         portfolio = (paths.curated / "portfolio_features.parquet").resolve().as_posix()
         customers = (paths.staging / "customers.parquet").resolve().as_posix()
@@ -101,12 +109,13 @@ def main(argv: list[str] | None = None) -> int:
             """
         )
 
+    # Execute every view_*.sql in the sql/ folder.
     with timed(logger, "create_views"):
         for sql_file in sorted(SQL_DIR.glob("view_*.sql")):
             _exec_file(con, sql_file)
             log_event(logger, "view_created", file=sql_file.name)
 
-    # Quick row-count summary for the run log
+    # Record row counts for each table in the run log.
     counts = {
         t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0]
         for t in ("fct_portfolio_snapshot", "dim_customer", "fct_sales", "fct_nps")

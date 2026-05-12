@@ -57,6 +57,7 @@ from utils import (
 # ---------------------------------------------------------------------------
 # Result type
 # ---------------------------------------------------------------------------
+# Standard return shape for every data-quality check.
 @dataclass
 class CheckResult:
     name: str
@@ -68,6 +69,7 @@ class CheckResult:
     evidence_path: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
+    # True only when the check passed cleanly.
     @property
     def passed(self) -> bool:
         return self.status == "PASS"
@@ -76,6 +78,7 @@ class CheckResult:
 # ---------------------------------------------------------------------------
 # Individual checks
 # ---------------------------------------------------------------------------
+# Verify the latest credit snapshot is recent enough.
 def check_freshness(credit: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     snaps = sorted(pd.to_datetime(credit["snapshot_date"].unique()))
     if not snaps:
@@ -96,12 +99,14 @@ def check_freshness(credit: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     )
 
 
+# Check that (loan_id, snapshot_date) is unique across credit rows.
 def check_uniqueness(credit: pd.DataFrame, paths) -> CheckResult:
     key = ["loan_id", "snapshot_date"]
     dup_mask = credit.duplicated(subset=key, keep=False)
     n_dups = int(dup_mask.sum())
     status = "PASS" if n_dups == 0 else "FAIL"
     evidence = None
+    # Persist offending rows to a CSV for triage.
     if n_dups:
         evidence = paths.outputs / "dq_duplicates.csv"
         credit.loc[dup_mask].to_csv(evidence, index=False)
@@ -114,6 +119,7 @@ def check_uniqueness(credit: pd.DataFrame, paths) -> CheckResult:
     )
 
 
+# Check that credit loan_ids mostly exist in the customer master.
 def check_referential_integrity(credit: pd.DataFrame, customers: pd.DataFrame,
                                 cfg: dict[str, Any], paths) -> CheckResult:
     cust_ids = set(customers["loan_id"].dropna().unique())
@@ -134,6 +140,7 @@ def check_referential_integrity(credit: pd.DataFrame, customers: pd.DataFrame,
     )
 
 
+# Check that customer ages sit in the configured [min, max] window.
 def check_range_customer_age(features: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     lo = cfg["quality"]["ranges"]["age_min"]
     hi = cfg["quality"]["ranges"]["age_max"]
@@ -152,6 +159,7 @@ def check_range_customer_age(features: pd.DataFrame, cfg: dict[str, Any]) -> Che
     )
 
 
+# Check that days_past_due sits in the configured range.
 def check_range_dpd(features: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     lo = cfg["quality"]["ranges"]["days_past_due_min"]
     hi = cfg["quality"]["ranges"]["days_past_due_max"]
@@ -166,17 +174,21 @@ def check_range_dpd(features: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     )
 
 
+# Check that null rates of critical columns are below configured thresholds.
 def check_null_thresholds(credit: pd.DataFrame, cfg: dict[str, Any]) -> list[CheckResult]:
     thresholds = cfg["quality"]["nulls"]["customer_id_columns"]
     results: list[CheckResult] = []
+    # One result per configured column.
     for col, max_pct in thresholds.items():
         col_l = col.lower()
+        # Required column is missing entirely.
         if col_l not in credit.columns:
             results.append(CheckResult(
                 f"NULL_{col}", "HIGH", "FAIL",
                 f"<= {max_pct:.1%} null", "column absent",
                 f"Required column `{col}` missing from credit"))
             continue
+        # Compare observed null rate to threshold.
         pct = credit[col_l].isna().mean()
         status = "PASS" if pct <= max_pct else "FAIL"
         results.append(CheckResult(
@@ -188,6 +200,7 @@ def check_null_thresholds(credit: pd.DataFrame, cfg: dict[str, Any]) -> list[Che
     return results
 
 
+# Check that the canonical credit schema is present in the staged data.
 def check_schema_drift(credit: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult:
     expected = [c.lower() for c in cfg["quality"]["schema_drift"]["credit_expected_columns"]]
     missing = [c for c in expected if c not in credit.columns]
@@ -204,11 +217,14 @@ def check_schema_drift(credit: pd.DataFrame, cfg: dict[str, Any]) -> CheckResult
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
+# Run every data-quality check and dispatch alerts for failures.
 def run_all(paths, cfg, logger) -> list[CheckResult]:
+    # Load the inputs each check needs.
     credit = pd.read_parquet(paths.staging / "credit_snapshots.parquet")
     customers = pd.read_parquet(paths.staging / "customers.parquet")
     features = pd.read_parquet(paths.curated / "portfolio_features.parquet")
 
+    # Execute checks in order.
     results: list[CheckResult] = []
     results.append(check_freshness(credit, cfg))
     results.append(check_uniqueness(credit, paths))
@@ -218,7 +234,7 @@ def run_all(paths, cfg, logger) -> list[CheckResult]:
     results.extend(check_null_thresholds(credit, cfg))
     results.append(check_schema_drift(credit, cfg))
 
-    # Dispatch alerts for failed/warned checks
+    # Send alerts for any failed or warning checks.
     for r in results:
         if r.status in ("FAIL", "WARN"):
             dispatch_alert(
@@ -232,7 +248,9 @@ def run_all(paths, cfg, logger) -> list[CheckResult]:
     return results
 
 
+# Render the check results as a Markdown report.
 def render_report(results: list[CheckResult]) -> str:
+    # Header + summary table.
     parts = ["## Data Quality Check Results",
              "",
              f"_Generated: {datetime.utcnow().isoformat()}Z_",
@@ -244,6 +262,7 @@ def render_report(results: list[CheckResult]) -> str:
     parts.append("")
     parts.append("### Failure detail")
     parts.append("")
+    # Detail section for any failed checks.
     failed = [r for r in results if not r.passed]
     if not failed:
         parts.append("_All checks passed._")
@@ -255,28 +274,32 @@ def render_report(results: list[CheckResult]) -> str:
     return "\n".join(parts)
 
 
+# CLI entrypoint: run all DQ checks and write report + JSON outputs.
 def main(argv: list[str] | None = None) -> int:
+    # Parse CLI args.
     parser = argparse.ArgumentParser(description="Run data quality checks")
     parser.add_argument("--config", default=None)
     parser.add_argument("--fail-on-fail", action="store_true",
                         help="Exit non-zero if any check FAILed")
     args = parser.parse_args(argv)
 
+    # Load config + set up directories and logger.
     cfg = load_config(args.config)
     paths = resolve_paths(cfg)
     ensure_dirs(paths)
     logger = get_logger("dq", paths.logs)
 
+    # Run every quality check.
     with timed(logger, "dq_checks"):
         results = run_all(paths, cfg, logger)
 
-    # Persist machine-readable
+    # Write machine-readable JSON results.
     (paths.outputs / "dq_results.json").write_text(
         json.dumps([asdict(r) for r in results], indent=2, default=str),
         encoding="utf-8",
     )
 
-    # Append to the human-readable data quality report
+    # Append the human-readable section to the data quality report.
     md = render_report(results)
     report = paths.outputs / "data_quality_report.md"
     existing = report.read_text(encoding="utf-8") if report.exists() else ""

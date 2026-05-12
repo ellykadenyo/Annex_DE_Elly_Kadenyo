@@ -47,7 +47,7 @@ from utils import (
 )
 
 
-# Date columns we know about (canonical, snake_case)
+# Canonical date columns expected in credit snapshots.
 DATE_COLUMNS_CREDIT = {
     "date",
     "sale_date",
@@ -61,6 +61,7 @@ DATE_COLUMNS_CREDIT = {
 # ---------------------------------------------------------------------------
 # Header normalisation
 # ---------------------------------------------------------------------------
+# Clean a single column header into snake_case.
 def _normalise_header(name: str) -> str:
     """Trim, replace mojibake, collapse whitespace, snake_case."""
     if name is None:
@@ -68,12 +69,14 @@ def _normalise_header(name: str) -> str:
     n = str(name).strip()
     # Remove mojibake / replacement characters often emitted by older Excel files
     n = n.replace("�", "").replace(" ", " ")
+    # Normalise unicode form, drop punctuation, collapse whitespace to underscores.
     n = unicodedata.normalize("NFKD", n)
     n = re.sub(r"[^\w\s]", " ", n)
     n = re.sub(r"\s+", "_", n).strip("_").lower()
     return n
 
 
+# Apply header normalisation to every column and drop padding columns.
 def normalise_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [_normalise_header(c) for c in df.columns]
@@ -87,39 +90,44 @@ def normalise_columns(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Empty-row handling for Excel "used range" padding
 # ---------------------------------------------------------------------------
+# Drop rows that are blank or have no key column values.
 def drop_empty_rows(df: pd.DataFrame, *, key_cols: Iterable[str] | None = None) -> pd.DataFrame:
     """Drop rows that are entirely NaN, or - if key_cols supplied - rows where
     every key column is NaN. Used to strip Excel's blank trailing rows.
     """
+    # If key columns are given, keep rows where at least one is non-null.
     if key_cols:
         existing = [c for c in key_cols if c in df.columns]
         if existing:
             mask = df[existing].notna().any(axis=1)
             return df.loc[mask].copy()
+    # Otherwise drop rows that are NaN across every column.
     return df.dropna(how="all").copy()
 
 
 # ---------------------------------------------------------------------------
 # Date parsing with multi-format support
 # ---------------------------------------------------------------------------
+# Parse listed columns to datetime, handling mixed formats and timezones.
 def parse_dates(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
     df = df.copy()
     for col in columns:
         if col not in df.columns:
             continue
         s = df[col]
+        # If already datetime, just strip any timezone.
         if pd.api.types.is_datetime64_any_dtype(s):
             df[col] = pd.to_datetime(s, errors="coerce").dt.tz_localize(None)
             continue
+        # First pass: month-first parsing.
         parsed = pd.to_datetime(s.astype("string"), errors="coerce", format="mixed", dayfirst=False)
-        # Some columns use day-first format (e.g. "30-06-2025"); retry day-first
-        # where the first attempt failed.
+        # Retry the rows that failed using day-first format (e.g. "30-06-2025").
         bad = parsed.isna() & s.notna()
         if bad.any():
             retry = pd.to_datetime(s.where(bad).astype("string"), errors="coerce",
                                    format="mixed", dayfirst=True)
             parsed = parsed.where(~bad, retry)
-        # Strip timezone (Africa/Nairobi was attached on some DOB rows)
+        # Drop timezone info (e.g. Africa/Nairobi on some DOB rows).
         if hasattr(parsed.dtype, "tz") and parsed.dtype.tz is not None:
             parsed = parsed.dt.tz_localize(None)
         df[col] = parsed
@@ -129,37 +137,35 @@ def parse_dates(df: pd.DataFrame, columns: Iterable[str]) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Domain-specific cleaners
 # ---------------------------------------------------------------------------
+# Clean a single credit snapshot: types, renames, dedupe.
 def clean_credit_snapshot(df: pd.DataFrame, *, snapshot_date) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["loan_id"])
 
-    # Cast date columns
+    # Parse all known date columns.
     df = parse_dates(df, DATE_COLUMNS_CREDIT)
 
-    # Stamp snapshot date (parsed from filename) regardless of what's in DATE
+    # Stamp the snapshot date from the filename (trusted source).
     df["snapshot_date"] = pd.to_datetime(snapshot_date).normalize()
 
-    # The source "customer_age" column is days-since-sale per the definitions
-    # (NOT the customer's age in years). Rename for clarity, leaving the column
-    # available but unambiguous downstream.
+    # `customer_age` in the source is actually days-since-sale; rename it.
     if "customer_age" in df.columns:
         df = df.rename(columns={"customer_age": "loan_age_days"})
 
-    # Standardise string categoricals
+    # Trim whitespace on categorical string columns.
     for c in ["balance_due_status", "account_status_l1", "account_status_l2",
               "credit_check_done"]:
         if c in df.columns:
             df[c] = df[c].astype("string").str.strip()
 
-    # Coerce key numerics
+    # Coerce financial / numeric columns to numbers.
     for c in ["balance", "arrears", "days_past_due", "total_paid",
               "total_due_today", "closing_balance", "balance_due_to_date",
               "weekly_rate", "deposit", "discount"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # Deduplicate snapshot rows. The composite primary key is (loan_id, snapshot_date).
-    # Keep the row with the freshest max_payment_date as a tie-break.
+    # Deduplicate on (loan_id, snapshot_date), keeping the freshest max_payment_date.
     if "loan_id" in df.columns:
         sort_cols = ["snapshot_date", "loan_id"]
         if "max_payment_date" in df.columns:
@@ -170,29 +176,35 @@ def clean_credit_snapshot(df: pd.DataFrame, *, snapshot_date) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
+# Clean the Sales Details sheet (product + price info per sale).
 def clean_sales_details(df: pd.DataFrame) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["sale_id", "loan_id"])
     df = parse_dates(df, ["sale_date", "return_date"])
+    # Coerce price columns to numbers.
     for c in ["cash_price", "loan_price"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
+    # Cast the returned flag to nullable boolean.
     if "returned" in df.columns:
         df["returned"] = df["returned"].astype("boolean")
-    # Standardise strings
+    # Trim string categoricals.
     for c in ["seller", "seller_type", "sale_type", "product_name", "model",
               "business_model", "client_model", "loan_term"]:
         if c in df.columns:
             df[c] = df[c].astype("string").str.strip()
+    # Keep the most recent sale per loan_id.
     if "loan_id" in df.columns:
         df = df.sort_values(["loan_id", "sale_date"], na_position="first")
         df = df.drop_duplicates(subset=["loan_id"], keep="last")
     return df.reset_index(drop=True)
 
 
+# Clean the Gender sheet (citizenship + gender per loan_id).
 def clean_sales_gender(df: pd.DataFrame) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["loan_id"])
+    # Standardise text to Title Case.
     for c in ["citizenship", "gender"]:
         if c in df.columns:
             df[c] = df[c].astype("string").str.strip().str.title()
@@ -201,37 +213,44 @@ def clean_sales_gender(df: pd.DataFrame) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
+# Clean the DOB sheet (date-of-birth per loan_id).
 def clean_sales_dob(df: pd.DataFrame) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["loan_id"])
     df = parse_dates(df, ["date_of_birth", "createdat_utc"])
+    # Keep the latest DOB record per loan.
     if "loan_id" in df.columns:
         df = df.sort_values(["loan_id", "createdat_utc"], na_position="first")
         df = df.drop_duplicates(subset=["loan_id"], keep="last")
     return df.reset_index(drop=True)
 
 
+# Clean the Income Level sheet (income panel per loan_id).
 def clean_sales_income(df: pd.DataFrame) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["loan_id"])
+    # Coerce income / count columns to numeric.
     for c in ["duration", "received", "persons_received_from_total",
               "banks_received", "paybills_received_others"]:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
+    # Keep the row with the largest `received` per loan.
     if "loan_id" in df.columns:
         df = df.sort_values(["loan_id", "received"], na_position="first")
         df = df.drop_duplicates(subset=["loan_id"], keep="last")
     return df.reset_index(drop=True)
 
 
+# Clean the NPS survey responses (one row per submission).
 def clean_nps(df: pd.DataFrame) -> pd.DataFrame:
     df = normalise_columns(df)
     df = drop_empty_rows(df, key_cols=["submission_id", "loan_id"])
-    # Rename the long NPS question column to a short, queryable name.
+    # Rename the verbose NPS question column to `nps_score`.
     long_q = next((c for c in df.columns if c.startswith("using_a_scale_from_0")), None)
     if long_q:
         df = df.rename(columns={long_q: "nps_score"})
     df = parse_dates(df, ["submitted_at"])
+    # Derive the NPS bucket (Detractor / Passive / Promoter) from the score.
     if "nps_score" in df.columns:
         df["nps_score"] = pd.to_numeric(df["nps_score"], errors="coerce")
         df["nps_bucket"] = pd.cut(
@@ -239,11 +258,11 @@ def clean_nps(df: pd.DataFrame) -> pd.DataFrame:
             bins=[-1, 6, 8, 10],
             labels=["Detractor", "Passive", "Promoter"],
         ).astype("string")
+    # Drop duplicate submissions.
     if "submission_id" in df.columns:
         df = df.drop_duplicates(subset=["submission_id"], keep="last")
 
-    # Free-text NPS columns can contain int/float values where respondents typed
-    # numbers; pin to nullable string so Parquet stays well-typed.
+    # Force all object columns to nullable string for Parquet stability.
     for c in df.columns:
         if df[c].dtype == object:
             df[c] = df[c].astype("string")
@@ -253,10 +272,12 @@ def clean_nps(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Orchestration
 # ---------------------------------------------------------------------------
+# Clean every credit snapshot CSV and concat into one DataFrame.
 def clean_all_credit(paths, cfg, logger) -> pd.DataFrame:
     pattern = cfg["ingest"]["filename_date_pattern"]
     fmt = cfg["ingest"]["filename_date_format"]
     frames: list[pd.DataFrame] = []
+    # Read and clean each snapshot file in turn.
     for f in list_credit_files(paths):
         snap = parse_snapshot_date(f.name, pattern, fmt).date()
         raw = pd.read_csv(f, **cfg["ingest"]["csv_read"])
@@ -267,15 +288,17 @@ def clean_all_credit(paths, cfg, logger) -> pd.DataFrame:
         frames.append(cleaned)
     if not frames:
         raise FileNotFoundError("No credit files to clean")
-    # Align column union (later snapshots may add columns)
+    # Align columns across snapshots before concatenation.
     union = sorted({c for f in frames for c in f.columns})
     frames = [f.reindex(columns=union) for f in frames]
     return pd.concat(frames, ignore_index=True)
 
 
+# Clean each sales sheet (Sales Details / Gender / DOB / Income Level).
 def clean_customer_master(paths, logger) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     xl = pd.ExcelFile(paths.raw_sales_xlsx)
     out: dict[str, pd.DataFrame] = {}
+    # Apply the right cleaner to each known sheet.
     for sheet, cleaner in (
         ("Sales Details", clean_sales_details),
         ("Gender",        clean_sales_gender),
@@ -290,6 +313,7 @@ def clean_customer_master(paths, logger) -> tuple[pd.DataFrame, pd.DataFrame, pd
     return out["Sales Details"], out["Gender"], out["DOB"], out["Income Level"]
 
 
+# Read + clean the NPS Excel file.
 def clean_nps_dataset(paths, logger) -> pd.DataFrame:
     raw = pd.read_excel(paths.raw_nps_xlsx)
     cleaned = clean_nps(raw)
@@ -297,9 +321,11 @@ def clean_nps_dataset(paths, logger) -> pd.DataFrame:
     return cleaned
 
 
+# Join all customer attribute sheets onto the sales backbone.
 def build_customer_master(sales, gender, dob, income) -> pd.DataFrame:
     """Left-join all customer attributes around the sales backbone."""
     base = sales[[c for c in sales.columns if c != "return_date"]].copy()
+    # Merge gender, DOB and income panel by loan_id.
     out = base.merge(gender[["loan_id", "citizenship", "gender"]],
                      on="loan_id", how="left", validate="one_to_one") \
               .merge(dob[["loan_id", "date_of_birth"]],
@@ -314,26 +340,32 @@ def build_customer_master(sales, gender, dob, income) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+# CLI entrypoint: read raw data, clean it, write Parquet staging files.
 def main(argv: list[str] | None = None) -> int:
+    # Parse CLI args.
     parser = argparse.ArgumentParser(description="Clean & stage raw data to Parquet")
     parser.add_argument("--config", default=None)
     args = parser.parse_args(argv)
 
+    # Load config + set up directories and logger.
     cfg = load_config(args.config)
     paths = resolve_paths(cfg)
     ensure_dirs(paths)
     logger = get_logger("cleaning", paths.logs)
 
+    # Stage credit snapshots.
     with timed(logger, "credit_snapshots"):
         credit = clean_all_credit(paths, cfg, logger)
         write_parquet(credit, paths.staging / "credit_snapshots.parquet")
 
+    # Stage customer master + sales fact.
     with timed(logger, "customers"):
         sales, gender, dob, income = clean_customer_master(paths, logger)
         customers = build_customer_master(sales, gender, dob, income)
         write_parquet(customers, paths.staging / "customers.parquet")
         write_parquet(sales,     paths.staging / "sales.parquet")
 
+    # Stage NPS responses.
     with timed(logger, "nps"):
         nps = clean_nps_dataset(paths, logger)
         write_parquet(nps, paths.staging / "nps.parquet")

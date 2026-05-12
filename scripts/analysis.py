@@ -43,12 +43,15 @@ CHARTS_DIR_NAME = "charts"
 # ---------------------------------------------------------------------------
 # 3A. Portfolio Health
 # ---------------------------------------------------------------------------
+# Run the 3A portfolio-health queries and write CSV outputs.
 def q3a_portfolio_health(con: duckdb.DuckDBPyConnection, paths) -> dict[str, pd.DataFrame]:
+    # Pull KPI matrices from the warehouse views.
     metrics = con.execute("SELECT * FROM v_portfolio_health").fetchdf()
     by_age   = con.execute("SELECT * FROM v_portfolio_by_age_band").fetchdf()
     by_inc   = con.execute("SELECT * FROM v_portfolio_by_income_band").fetchdf()
     by_risk  = con.execute("SELECT * FROM v_portfolio_by_risk").fetchdf()
 
+    # Persist each as a CSV for the outputs folder.
     write_csv(metrics, paths.outputs / "portfolio_metrics.csv")
     write_csv(by_age,  paths.outputs / "portfolio_by_age_band.csv")
     write_csv(by_inc,  paths.outputs / "portfolio_by_income_band.csv")
@@ -60,10 +63,13 @@ def q3a_portfolio_health(con: duckdb.DuckDBPyConnection, paths) -> dict[str, pd.
 # ---------------------------------------------------------------------------
 # 3B. Credit x NPS
 # ---------------------------------------------------------------------------
+# Run the 3B credit-x-NPS queries and write CSV outputs.
 def q3b_credit_x_nps(con: duckdb.DuckDBPyConnection, paths) -> dict[str, pd.DataFrame]:
+    # Per-respondent credit + NPS join.
     cxn = con.execute("SELECT * FROM v_credit_x_nps").fetchdf()
     write_csv(cxn, paths.outputs / "credit_x_nps.csv")
 
+    # NPS metrics aggregated by days-past-due bucket.
     by_dpd = con.execute(
         """
         SELECT
@@ -95,6 +101,7 @@ def q3b_credit_x_nps(con: duckdb.DuckDBPyConnection, paths) -> dict[str, pd.Data
     ).fetchdf()
     write_csv(by_dpd, paths.outputs / "nps_by_dpd_bucket.csv")
 
+    # NPS metrics aggregated by risk_category.
     by_risk = con.execute(
         """
         SELECT
@@ -117,10 +124,12 @@ def q3b_credit_x_nps(con: duckdb.DuckDBPyConnection, paths) -> dict[str, pd.Data
 # ---------------------------------------------------------------------------
 # Charts (matplotlib only, no styling overrides for repeatability)
 # ---------------------------------------------------------------------------
+# Line chart of portfolio KPIs (delinquency/PAR30/write-off/paid-off) over time.
 def chart_portfolio_trend(metrics: pd.DataFrame, out: Path) -> None:
     fig, ax = plt.subplots(figsize=(9, 5))
     m = metrics.copy()
     m["snapshot_date"] = pd.to_datetime(m["snapshot_date"])
+    # Plot one line per KPI as a percentage.
     for col, label in [
         ("delinquency_rate", "Delinquency"),
         ("par30_rate", "PAR 30"),
@@ -138,11 +147,13 @@ def chart_portfolio_trend(metrics: pd.DataFrame, out: Path) -> None:
     plt.close(fig)
 
 
+# Bar chart of delinquency rate by age band, grouped by snapshot.
 def chart_dpd_by_age(by_age: pd.DataFrame, out: Path) -> None:
     df = by_age.dropna(subset=["age_band"])
     df = df[df["age_band"] != "Unknown"]
     if df.empty:
         return
+    # Pivot to age_band x snapshot for grouped bars.
     pivot = df.pivot_table(index="age_band", columns="snapshot_date",
                            values="delinquency_rate", aggfunc="mean")
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -156,7 +167,9 @@ def chart_dpd_by_age(by_age: pd.DataFrame, out: Path) -> None:
     plt.close(fig)
 
 
+# Bar chart of delinquency rate by income band, in income order.
 def chart_dpd_by_income(by_inc: pd.DataFrame, out: Path) -> None:
+    # Force income bands to display in ascending order.
     order = [
         "Below 5,000", "5,000-9,999", "10,000-19,999", "20,000-29,999",
         "30,000-49,999", "50,000-99,999", "100,000-149,999", "150,000+",
@@ -178,6 +191,7 @@ def chart_dpd_by_income(by_inc: pd.DataFrame, out: Path) -> None:
     plt.close(fig)
 
 
+# Bar chart of average NPS score per days-past-due bucket.
 def chart_nps_by_dpd(by_dpd: pd.DataFrame, out: Path) -> None:
     df = by_dpd[by_dpd["dpd_bucket"] != "no_match"].copy()
     if df.empty:
@@ -193,11 +207,15 @@ def chart_nps_by_dpd(by_dpd: pd.DataFrame, out: Path) -> None:
     plt.close(fig)
 
 
+# Stacked-bar chart showing risk-category mix as % of accounts per snapshot.
 def chart_risk_mix(by_risk: pd.DataFrame, out: Path) -> None:
+    # Pivot snapshot_date x risk_category, fill missing with 0.
     pivot = by_risk.pivot_table(index="snapshot_date", columns="risk_category",
                                 values="accounts", aggfunc="sum").fillna(0)
+    # Reorder categories from worst-to-best for visual stacking.
     cols_order = [c for c in ["Critical", "High", "Medium", "Low"] if c in pivot.columns]
     pivot = pivot[cols_order]
+    # Convert to percentages.
     pivot_pct = pivot.div(pivot.sum(axis=1), axis=0) * 100
     fig, ax = plt.subplots(figsize=(9, 5))
     pivot_pct.plot(kind="bar", stacked=True, ax=ax, colormap="RdYlGn_r")
@@ -213,30 +231,31 @@ def chart_risk_mix(by_risk: pd.DataFrame, out: Path) -> None:
 # ---------------------------------------------------------------------------
 # Narrative (3A / 3B / 3C answer in markdown - read into slides too)
 # ---------------------------------------------------------------------------
+# Compute the headline statistics used in the narrative summary.
 def derive_insights(metrics: pd.DataFrame, by_age: pd.DataFrame,
                     by_inc: pd.DataFrame, by_dpd: pd.DataFrame,
                     by_risk: pd.DataFrame) -> dict[str, Any]:
     """Compute the headline numbers used in narrative + slides."""
 
-    # Pick first vs last snapshot for trend statement
+    # First and last snapshot rows for trend comparison.
     first = metrics.iloc[0]
     last = metrics.iloc[-1]
 
-    # Worst age band by mean delinquency
+    # Mean delinquency by age band, sorted worst-first.
     age = by_age[~by_age["age_band"].isin(["Unknown"])]
     worst_age = (
         age.groupby("age_band")["delinquency_rate"].mean().sort_values(ascending=False)
         if not age.empty else pd.Series(dtype=float)
     )
 
-    # Worst income band
+    # Mean delinquency by income band, sorted worst-first.
     inc = by_inc[~by_inc["income_band"].isin(["Unknown"])]
     worst_inc = (
         inc.groupby("income_band")["delinquency_rate"].mean().sort_values(ascending=False)
         if not inc.empty else pd.Series(dtype=float)
     )
 
-    # NPS spread between delinquent vs current respondents
+    # Compare mean NPS for current vs delinquent respondents.
     cur = by_dpd[by_dpd["dpd_bucket"] == "0 (current)"]
     del_ = by_dpd[by_dpd["dpd_bucket"].isin(["31-60", "61-90", "90+"])]
     cur_nps = float(cur["avg_nps"].mean()) if not cur.empty else float("nan")
@@ -250,13 +269,16 @@ def derive_insights(metrics: pd.DataFrame, by_age: pd.DataFrame,
     }
 
 
+# Build the narrative Markdown file from the derived insights.
 def write_insights_md(out_path: Path, ins: dict[str, Any], by_dpd: pd.DataFrame) -> None:
+    # Unpack the precomputed numbers.
     first, last = ins["first"], ins["last"]
     worst_age = ins["worst_age"]
     worst_inc = ins["worst_inc"]
     by_risk_last = ins["by_risk_last"]
 
     lines: list[str] = []
+    # 3A: portfolio health KPIs + stressed segments.
     lines += [
         "# Portfolio Insights",
         "",
@@ -273,19 +295,23 @@ def write_insights_md(out_path: Path, ins: dict[str, Any], by_dpd: pd.DataFrame)
         "**Most-stressed customer segments (mean delinquency across snapshots):**",
         "",
     ]
+    # Top-3 worst age bands.
     if not worst_age.empty:
         lines.append("- Age band:")
         for label, val in worst_age.head(3).items():
             lines.append(f"  - `{label}` -> {val:.1%}")
+    # Top-3 worst income bands.
     if not worst_inc.empty:
         lines.append("- Income band:")
         for label, val in worst_inc.head(3).items():
             lines.append(f"  - `{label}` -> {val:.1%}")
 
+    # Risk mix for the most recent snapshot.
     lines += ["", "**Latest snapshot risk mix:**", ""]
     for _, row in by_risk_last.iterrows():
         lines.append(f"- {row['risk_category']}: {int(row['accounts']):,} accounts | balance KES {row['balance']:,.0f}")
 
+    # 3B: credit outcomes x customer experience.
     lines += [
         "",
         "## 3B. Credit Outcomes x Customer Experience",
@@ -299,12 +325,14 @@ def write_insights_md(out_path: Path, ins: dict[str, Any], by_dpd: pd.DataFrame)
         "| DPD bucket | Respondents | Avg NPS | Promoter % | Detractor % |",
         "|------------|-------------|---------|------------|-------------|",
     ]
+    # Render one table row per DPD bucket.
     for _, row in by_dpd.iterrows():
         lines.append(
             f"| {row['dpd_bucket']} | {int(row['respondents']):,} | "
             f"{row['avg_nps']:.2f} | {row['promoter_rate']:.1%} | {row['detractor_rate']:.1%} |"
         )
 
+    # 3C: data gaps + recommended improvements.
     lines += [
         "",
         "**Recommendation.** Customers experiencing payment friction report lower NPS. "
@@ -342,36 +370,46 @@ def write_insights_md(out_path: Path, ins: dict[str, Any], by_dpd: pd.DataFrame)
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
+# CLI entrypoint: run queries, render charts, write narrative.
 def main(argv: list[str] | None = None) -> int:
+    # Parse CLI args.
     parser = argparse.ArgumentParser(description="Run portfolio analysis")
     parser.add_argument("--config", default=None)
     args = parser.parse_args(argv)
 
+    # Load config + set up directories and logger.
     cfg = load_config(args.config)
     paths = resolve_paths(cfg)
     ensure_dirs(paths)
     logger = get_logger("analysis", paths.logs)
 
+    # Ensure the charts subfolder exists.
     charts_dir = paths.outputs / CHARTS_DIR_NAME
     charts_dir.mkdir(parents=True, exist_ok=True)
 
+    # Connect to the DuckDB warehouse.
     con = duckdb.connect(str(paths.warehouse))
     try:
+        # 3A: portfolio health KPIs.
         with timed(logger, "q3a"):
             a = q3a_portfolio_health(con, paths)
+        # 3B: credit x NPS analytics.
         with timed(logger, "q3b"):
             b = q3b_credit_x_nps(con, paths)
+        # Render all charts.
         with timed(logger, "charts"):
             chart_portfolio_trend(a["metrics"], charts_dir / "portfolio_trend.png")
             chart_dpd_by_age(a["by_age"],     charts_dir / "delinquency_by_age.png")
             chart_dpd_by_income(a["by_inc"],  charts_dir / "delinquency_by_income.png")
             chart_risk_mix(a["by_risk"],      charts_dir / "risk_mix.png")
             chart_nps_by_dpd(b["by_dpd"],     charts_dir / "nps_by_dpd.png")
+        # Write the narrative Markdown insights file.
         with timed(logger, "insights"):
             ins = derive_insights(a["metrics"], a["by_age"], a["by_inc"],
                                   b["by_dpd"], a["by_risk"])
             write_insights_md(paths.outputs / "insights.md", ins, b["by_dpd"])
     finally:
+        # Always close the DuckDB connection.
         con.close()
 
     log_event(logger, "analysis_complete",

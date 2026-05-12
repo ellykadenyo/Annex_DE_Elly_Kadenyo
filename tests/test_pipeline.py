@@ -28,12 +28,14 @@ import quality_checks as qc  # noqa: E402
 # ---------------------------------------------------------------------------
 # Cleaning
 # ---------------------------------------------------------------------------
+# Headers should be trimmed, lowercased, and mojibake stripped.
 def test_normalise_columns_strips_whitespace_and_mojibake():
     df = pd.DataFrame(columns=["Loan Id ", "  Email ", "Score?", "(If Yes) �Q"])
     out = dc.normalise_columns(df)
     assert list(out.columns) == ["loan_id", "email", "score", "if_yes_q"]
 
 
+# Excel padding columns named "Unnamed: <N>" should be dropped.
 def test_normalise_columns_drops_unnamed_padding():
     df = pd.DataFrame(columns=["loan_id", "Unnamed: 28", "balance"])
     out = dc.normalise_columns(df)
@@ -41,6 +43,7 @@ def test_normalise_columns_drops_unnamed_padding():
     assert set(out.columns) == {"loan_id", "balance"}
 
 
+# Rows where all key columns are NaN should be dropped.
 def test_drop_empty_rows_by_key():
     df = pd.DataFrame({
         "loan_id": ["A", None, "B", None],
@@ -50,6 +53,7 @@ def test_drop_empty_rows_by_key():
     assert list(out["loan_id"]) == ["A", "B"]
 
 
+# Both month-first and day-first date strings should parse correctly.
 def test_parse_dates_handles_mixed_format():
     df = pd.DataFrame({"date": ["1/2/2025", "30-06-2025", None]})
     out = dc.parse_dates(df, ["date"])
@@ -59,6 +63,7 @@ def test_parse_dates_handles_mixed_format():
     assert pd.isna(out["date"].iloc[2])
 
 
+# Duplicate (loan_id, snapshot_date) rows should collapse to one.
 def test_clean_credit_snapshot_dedupes_on_pk():
     df = pd.DataFrame({
         "LOAN_ID":           ["L1", "L1", "L2"],
@@ -81,6 +86,7 @@ def test_clean_credit_snapshot_dedupes_on_pk():
 # ---------------------------------------------------------------------------
 # Feature engineering
 # ---------------------------------------------------------------------------
+# Negative or > 130 year ages should be returned as NaN.
 def test_compute_age_years_rejects_impossible():
     dob = pd.Series([datetime(1990, 1, 1), datetime(2050, 1, 1), None])
     ref = pd.Series([datetime(2025, 1, 1)] * 3)
@@ -90,6 +96,7 @@ def test_compute_age_years_rejects_impossible():
     assert pd.isna(out.iloc[2])
 
 
+# Bands use [min, max) semantics: lower inclusive, upper exclusive.
 def test_band_uses_inclusive_lower_exclusive_upper():
     bands = [
         {"label": "18-25", "min": 18, "max": 26},
@@ -101,6 +108,7 @@ def test_band_uses_inclusive_lower_exclusive_upper():
     assert list(out.fillna("MISSING")) == ["MISSING", "18-25", "18-25", "26-35", "55+", "55+"]
 
 
+# Risk rules apply in priority order; the first matching rule wins.
 def test_classify_risk_first_match_wins():
     rules = [
         {"name": "Critical", "account_status_l1_in": ["Write Off"]},
@@ -119,6 +127,7 @@ def test_classify_risk_first_match_wins():
 # ---------------------------------------------------------------------------
 # Data quality
 # ---------------------------------------------------------------------------
+# Uniqueness check should fail and dump evidence when duplicates exist.
 def test_uniqueness_check_fails_on_duplicates(tmp_path):
     df = pd.DataFrame({
         "loan_id":       ["A", "A", "B"],
@@ -130,6 +139,7 @@ def test_uniqueness_check_fails_on_duplicates(tmp_path):
     assert (tmp_path / "dq_duplicates.csv").exists()
 
 
+# Uniqueness check should pass when the key is unique.
 def test_uniqueness_check_passes_on_clean_data(tmp_path):
     df = pd.DataFrame({
         "loan_id":       ["A", "B"],
@@ -140,6 +150,7 @@ def test_uniqueness_check_passes_on_clean_data(tmp_path):
     assert r.status == "PASS"
 
 
+# Range check should flag ages outside the [min, max] window.
 def test_range_age_flags_outliers():
     df = pd.DataFrame({"customer_age_years": [25.0, 200.0, 15.0, None]})
     cfg = {"quality": {"ranges": {"age_min": 18, "age_max": 100}}}
