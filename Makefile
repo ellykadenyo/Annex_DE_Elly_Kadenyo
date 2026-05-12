@@ -3,7 +3,7 @@
 PY ?= python
 
 .PHONY: install profile clean features warehouse quality analysis run \
-        architecture slides test all distclean
+        test all distclean
 
 install:
 	$(PY) -m pip install -r requirements.txt
@@ -26,20 +26,12 @@ quality:
 analysis:
 	$(PY) scripts/analysis.py
 
-architecture:
-	$(PY) scripts/make_architecture.py
-
-slides:
-	$(PY) scripts/make_slides.py
-
 test:
 	$(PY) -m pytest tests -q
 
 # Single-command full reproduction
 run:
 	$(PY) scripts/run_pipeline.py --warehouse-fresh
-	$(PY) scripts/make_architecture.py
-	$(PY) scripts/make_slides.py
 
 all: install run test
 
