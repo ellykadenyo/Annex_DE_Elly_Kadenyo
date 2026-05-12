@@ -94,7 +94,7 @@ quality:
 
 alerting:
   channels:
-    - { name: "email",    recipients: ["data-eng@abcphones.example", "analytics-lead@abcphones.example"] }
+    - { name: "email",    recipients: ["ellykadenyo@gmail.com", "ellykadenyo@yahoo.com"] }
     - { name: "slack",    webhook_env: "ALERT_SLACK_WEBHOOK" }
     - { name: "pagerduty", routing_key_env: "ALERT_PAGERDUTY_KEY" }
   severity_routing:
